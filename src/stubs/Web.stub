@@ -12,4 +12,4 @@
 | All Routes under "{{module_name_small}}" prefix
 */
 
-Route::get('/', 'TestController@index');
+Route::get('/', '{{module_name}}Controller@index');

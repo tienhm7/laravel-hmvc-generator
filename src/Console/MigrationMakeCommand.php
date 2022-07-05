@@ -3,6 +3,7 @@
 namespace tienhm7\HMVCGenerator\Console;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Artisan;
 
 class MigrationMakeCommand extends Command
@@ -34,18 +35,27 @@ class MigrationMakeCommand extends Command
     public function handle()
     {
         $name = $this->argument('name');
+
         $moduleName = $this->option('module') ?? $this->ask("Module Name ?");
-        $create = $this->option('create');
-        $table = $this->option('table');
-        $modulePath =  app_path(DIRECTORY_SEPARATOR . 'Modules' . DIRECTORY_SEPARATOR . $moduleName) . DIRECTORY_SEPARATOR;
+        $moduleName = ucfirst(Str::camel($moduleName));
+
+        $modulePath = app_path('Modules/' . $moduleName.'/');
         if (!file_exists($modulePath)) {
             $this->error(sprintf('%s module is not exists', $moduleName));
             return;
         }
-        $migration_path = $modulePath . 'Database' . DIRECTORY_SEPARATOR . 'Migrations';
-        if (!file_exists($migration_path)) {
-            mkdir($migration_path, 0777, true);
+
+        $migrationPath = $modulePath . 'Database' . DIRECTORY_SEPARATOR . 'Migrations';
+        if (
+            !file_exists($migrationPath) &&
+            !mkdir($migrationPath, 0777, true) &&
+            !is_dir($migrationPath)
+        ) {
+            throw new \RuntimeException(sprintf('Directory "%s" was not created', $migrationPath));
         }
+
+        $create = $this->option('create');
+        $table = $this->option('table');
         $related_path = 'app/Modules/' . $moduleName . '/Database/Migrations';
         Artisan::call('make:migration '. $name . ' --path='. $related_path . ' --create=' . $create . ' --table=' . $table);
         $this->info('Done !');

@@ -3,6 +3,7 @@
 namespace tienhm7\HMVCGenerator\Console;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 
 class RequestMakeCommand extends Command
 {
@@ -33,18 +34,41 @@ class RequestMakeCommand extends Command
     public function handle()
     {
         $name = $this->argument('name');
+        
         $moduleName = $this->option('module') ?? $this->ask("Module Name ?");
-        $modulePath =  app_path(DIRECTORY_SEPARATOR . 'Modules' . DIRECTORY_SEPARATOR . $moduleName) . DIRECTORY_SEPARATOR;
+        $moduleName = ucfirst(Str::camel($moduleName));
+
+        $modulePath = app_path('Modules/' . $moduleName.'/');
         if (!file_exists($modulePath)) {
             $this->error(sprintf('%s module is not exists', $moduleName));
             return;
         }
-        $requests_path = $modulePath . 'Http' . DIRECTORY_SEPARATOR . 'Requests';
-        if (!file_exists($requests_path)) {
-            mkdir($requests_path, 0777, true);
+        
+        $requestsPath = $modulePath . 'Http' . DIRECTORY_SEPARATOR . 'Requests';
+        if (
+            !file_exists($requestsPath) &&
+            !mkdir($requestsPath, 0777, true) &&
+            !is_dir($requestsPath)
+        ) {
+            throw new \RuntimeException(sprintf('Directory "%s" was not created', $requestsPath));
         }
-        $middleware_template = str_replace(['{{module_name}}', '{{module_name_small}}', '{{request_name}}'], [$moduleName, strtolower($moduleName), $name], get_stub('Request'));
-        file_put_contents($requests_path . DIRECTORY_SEPARATOR . $name.'.php', $middleware_template);
+        
+        $requestTemplate = str_replace(
+            [
+                '{{module_name}}',
+                '{{module_name_small}}',
+                '{{request_name}}'
+            ],
+            [
+                $moduleName,
+                strtolower($moduleName),
+                $name
+            ],
+            get_stub('Request')
+        );
+
+        file_put_contents($requestsPath . DIRECTORY_SEPARATOR . $name.'.php', $requestTemplate);
+
         $this->info('Done !');
     }
 }

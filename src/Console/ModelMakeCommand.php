@@ -3,6 +3,7 @@
 namespace tienhm7\HMVCGenerator\Console;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 
 class ModelMakeCommand extends Command
 {
@@ -38,17 +39,40 @@ class ModelMakeCommand extends Command
     public function handle()
     {
         $name = $this->argument('name');
+
         $moduleName = $this->option('module') ?? $this->ask("Module Name ?");
-        $modulePath = app_path(DIRECTORY_SEPARATOR . 'Modules' . DIRECTORY_SEPARATOR . $moduleName) . DIRECTORY_SEPARATOR;
+        $moduleName = ucfirst(Str::camel($moduleName));
+
+        $modulePath = app_path('Modules/' . $moduleName.'/');
         if (!file_exists($modulePath)) {
             $this->error(sprintf('%s module is not exists', $moduleName));
             return;
         }
-        if (!file_exists($modulePath . 'Models')) {
-            mkdir($modulePath . 'Models', 0777, true);
+
+        if (
+            !file_exists($modulePath . 'Models') &&
+            !mkdir($concurrentDirectory = $modulePath . 'Models', 0777, true) &&
+            !is_dir($concurrentDirectory)
+        ) {
+            throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
         }
-        $model_template = str_replace(['{{module_name}}', '{{module_name_small}}', '{{model_name}}'], [$moduleName, strtolower($moduleName), $name], get_stub('Model'));
-        file_put_contents($modulePath . 'Models' . DIRECTORY_SEPARATOR . $name.'.php', $model_template);
+
+        $modelTemplate = str_replace(
+            [
+                '{{module_name}}',
+                '{{module_name_small}}',
+                '{{model_name}}'
+            ],
+            [
+                $moduleName,
+                strtolower($moduleName),
+                $name
+            ],
+            get_stub('Model')
+        );
+
+        file_put_contents($modulePath . 'Models' . DIRECTORY_SEPARATOR . $name.'.php', $modelTemplate);
+
         $this->info('Done !');
     }
 }

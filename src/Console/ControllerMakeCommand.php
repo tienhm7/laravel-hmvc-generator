@@ -3,6 +3,7 @@
 namespace tienhm7\HMVCGenerator\Console;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 
 class ControllerMakeCommand extends Command
 {
@@ -37,18 +38,42 @@ class ControllerMakeCommand extends Command
      */
     public function handle()
     {
-        $name = $this->argument('module');
-        $moduleName = $this->option('module_name') ?? $this->ask("Module Name ?");
-        $modulePath = app_path(DIRECTORY_SEPARATOR . 'Modules' . DIRECTORY_SEPARATOR . $moduleName) . DIRECTORY_SEPARATOR;
+        $name = $this->argument('name');
+
+        $moduleName = $this->option('module') ?? $this->ask("Module Name ?");
+        $moduleName = ucfirst($moduleName);
+
+        $modulePath = app_path('Modules/' . $moduleName.'/');
+        // check exist module path
         if (!file_exists($modulePath)) {
             $this->error(sprintf('%s module is not exists', $moduleName));
             return;
         }
-        if (!file_exists($modulePath . 'Http' . DIRECTORY_SEPARATOR . 'Controllers')) {
-            mkdir($modulePath . 'Http' . DIRECTORY_SEPARATOR . 'Controllers', 0777, true);
+
+        if (
+            !file_exists($modulePath . 'Http' . DIRECTORY_SEPARATOR . 'Controllers') &&
+            !mkdir($concurrentDirectory = $modulePath . 'Http' . DIRECTORY_SEPARATOR . 'Controllers', 0777, true) &&
+            !is_dir($concurrentDirectory)
+        ) {
+            throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
         }
-        $controller_template = str_replace(['{{module_name}}', '{{module_name_small}}', '{{controller_name}}'], [$moduleName, strtolower($moduleName), $name], get_stub('Controller'));
-        file_put_contents($modulePath . 'Http' . DIRECTORY_SEPARATOR . 'Controllers' . DIRECTORY_SEPARATOR . $name . '.php', $controller_template);
+
+        $controllerTemplate = str_replace(
+            [
+                '{{module_name}}',
+                '{{module_name_small}}',
+                '{{controller_name}}'
+            ],
+            [
+                $moduleName,
+                strtolower($moduleName),
+                $name
+            ],
+            get_stub('Controller')
+        );
+
+        file_put_contents($modulePath . 'Http' . DIRECTORY_SEPARATOR . 'Controllers' . DIRECTORY_SEPARATOR . $name . '.php', $controllerTemplate);
+
         $this->info('Done !');
     }
 

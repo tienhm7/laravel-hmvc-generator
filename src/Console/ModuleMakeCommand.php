@@ -41,7 +41,7 @@ class ModuleMakeCommand extends Command
     public function handle()
     {
         $moduleName = $this->argument('module_name');
-        $moduleName = ucfirst($moduleName);
+        $moduleName = ucfirst(Str::camel($moduleName));
 
         $modulePath = app_path('Modules/' . $moduleName.'/');
         // check exist module path
@@ -50,25 +50,26 @@ class ModuleMakeCommand extends Command
             return;
         }
 
-        $this->createFolders($moduleName);
+        $this->createFolders($modulePath, $moduleName);
         $this->stubFiles($modulePath, $moduleName);
         $this->info('Module created successfully.');
     }
 
     /**
      * create folder for module
+     * @param $modulePath
      * @param $moduleName
      * @return void
      */
-    private function createFolders($moduleName)
+    private function createFolders($modulePath, $moduleName)
     {
         $neededFolders = array(
             'Config',
             'Database/Migrations',
             'Providers',
-            'Resources/Lang/en',
-            'Resources/Lang/vi',
-            'Resources/Views/' . strtolower($moduleName),
+            'Lang/en',
+            'Lang/vi',
+            'Views',
             'Routes',
         );
 
@@ -83,21 +84,60 @@ class ModuleMakeCommand extends Command
             $this->info("Created $neededFolder in Module $moduleName");
         }
 
-        Artisan::call('module:make-request', ['name' => 'TestRequest', '--module_name' => ucfirst($moduleName)]);
-        Artisan::call('module:make-middleware', ['name' => 'TestMiddleware', '--module_name' => ucfirst($moduleName)]);
-        Artisan::call('module:make-controller', ['name' => 'TestController', '--module_name' => ucfirst($moduleName)]);
-        Artisan::call('module:make-model', ['name' => 'Test', '--module_name' => ucfirst($moduleName)]);
+        Artisan::call('module:make-request', ['name' => $moduleName.'Request', '--module' => ucfirst($moduleName)]);
+        Artisan::call('module:make-middleware', ['name' => $moduleName.'Middleware', '--module' => ucfirst($moduleName)]);
+        Artisan::call('module:make-controller', ['name' => $moduleName.'Controller', '--module' => ucfirst($moduleName)]);
+        Artisan::call('module:make-model', ['name' => $moduleName, '--module' => ucfirst($moduleName)]);
     }
 
     private function stubFiles($modulePath, $moduleName)
     {
-        $service_provider_template = str_replace(['{{module_name}}', '{{module_name_small}}'], [$moduleName, strtolower($moduleName)], get_stub('ServiceProvider'));
-        $web_template = str_replace(['{{module_name}}', '{{module_name_small}}'], [$moduleName, strtolower($moduleName)], get_stub('Web'));
-        $api_template = str_replace(['{{module_name}}', '{{module_name_small}}'], [$moduleName, strtolower($moduleName)], get_stub('Api'));
-        file_put_contents($modulePath . 'Providers/' . $moduleName . 'ServiceProvider.php', $service_provider_template);
-        file_put_contents($modulePath . 'Routes/' . 'web.php', $web_template);
-        file_put_contents($modulePath . 'Routes/' . 'api.php', $api_template);
-        file_put_contents($modulePath . 'Resources/' . 'Views' . DIRECTORY_SEPARATOR . 'test.blade.php', '<h1>' . $moduleName . '</h1>');
+        $serviceProviderTemplate = str_replace(
+            [
+                '{{module_name}}',
+                '{{module_name_small}}'
+            ],
+            [
+                $moduleName,
+                strtolower($moduleName)
+            ],
+            get_stub('ServiceProvider')
+        );
+
+        $webTemplate = str_replace(
+            [
+                '{{module_name}}',
+                '{{module_name_small}}'
+            ],
+            [
+                $moduleName,
+                strtolower($moduleName)
+            ],
+            get_stub('Web')
+        );
+
+        $apiTemplate = str_replace(
+            [
+                '{{module_name}}',
+                '{{module_name_small}}'
+            ],
+            [
+                $moduleName,
+                strtolower($moduleName)
+            ],
+            get_stub('Api')
+        );
+
+        file_put_contents(
+            $modulePath . 'Providers/' . $moduleName . 'ServiceProvider.php',
+            $serviceProviderTemplate
+        );
+        file_put_contents($modulePath . 'Routes/' . 'web.php', $webTemplate);
+        file_put_contents($modulePath . 'Routes/' . 'api.php', $apiTemplate);
+        file_put_contents(
+            $modulePath . 'Views/' . 'index.blade.php',
+            '<h1>' . $moduleName . '</h1>'
+        );
     }
 
 }

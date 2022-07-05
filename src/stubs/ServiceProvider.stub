@@ -10,10 +10,6 @@ class {{module_name}}ServiceProvider extends ServiceProvider
 {
     private $namespace = 'App\\Modules\\{{module_name}}\\Http\\Controllers';
 
-    private $modulePath = null;
-
-    private $moduleName = '{{module_name}}';
-
     public function __construct(\Illuminate\Contracts\Foundation\Application $app)
     {
         parent::__construct($app);
@@ -63,8 +59,8 @@ class {{module_name}}ServiceProvider extends ServiceProvider
 
     private function load_views()
     {
-        $this->loadViewsFrom($this->module_path . 'Resources' . DIRECTORY_SEPARATOR . 'Views', '{{module_name_small}}');
-        $this->loadTranslationsFrom($this->module_path . 'Resources' . DIRECTORY_SEPARATOR . 'Lang', '{{module_name_small}}');
+        $this->loadViewsFrom($this->module_path . 'Views', '{{module_name_small}}');
+        $this->loadTranslationsFrom($this->module_path . 'Lang', '{{module_name_small}}');
     }
 
     private function load_migrations()

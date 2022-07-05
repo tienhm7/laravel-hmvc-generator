@@ -1,33 +1,37 @@
+[![Latest Stable Version](https://poser.pugx.org/tienhm7/laravel-hmvc-generator/v/stable)](https://packagist.org/packages/tienhm7/laravel-hmvc-generator)
+[![Total Downloads](https://poser.pugx.org/tienhm7/laravel-hmvc-generator/downloads)](https://packagist.org/packages/tienhm7/laravel-hmvc-generator)
+[![Latest Unstable Version](https://poser.pugx.org/tienhm7/laravel-hmvc-generator/v/unstable)](https://packagist.org/packages/tienhm7/laravel-hmvc-generator)
+[![composer.lock](https://poser.pugx.org/tienhm7/laravel-hmvc-generator/composerlock)](https://packagist.org/packages/tienhm7/laravel-hmvc-generator)
+[![License](https://poser.pugx.org/tienhm7/laravel-hmvc-generator/license)](https://packagist.org/packages/tienhm7/laravel-hmvc-generator)
 # HMVC_Generator
 A Laravel package to create and manage your large laravel app using modules [HMVC]
 
 
 ### Folder Structure
 - Modules
-	- Users
-		- Config/
-		- Database/
-			- Migrations/
-		- Http/
-			- Controllers/
-				- TestController.php
-			- Middleware/
-				- TestMiddleware.php
-			- Requests/
-				- TestRequest.php
-		- Models/
-			- Test.php
-		- Providers/
-			- UsersServiceProvider.php
-		- Resources/
-			- Lang/
-				- ar/
-				- en/
-			- Views/
-				- test.blade.php
-		- Routes/
-			- web.php  "All Routes under "users" prefix"
-			- api.php  "All Routes under "api/users" prefix"
+	- User
+        - Config/
+        - Database/
+            - Migrations/
+        - Http/
+            - Controllers/
+                - UserController.php
+            - Middleware/
+                - UserMiddleware.php
+            - Requests/
+                - UserRequest.php
+        - Models/
+            - User.php
+        - Providers/
+            - UserServiceProvider.php
+        - Lang/
+            - en/
+            - vi/
+        - Views/
+            - index.blade.php
+        - Routes/
+            - web.php  "All Routes under "users" prefix"
+            - api.php  "All Routes under "api/users" prefix"
 	
 ### Artisan Commands
 - To create a new module you can simply run :
@@ -53,6 +57,9 @@ php artisan module:make-request <request_name> --module=<module_name>
 - Create new Migration for the specified module :
 ```
 php artisan module:make-migration <migration_name> --module=<module_name> --table=<table_name>
+
+// Example:
+php artisan module:make-migration create_posts_table --module=Post
 ```
 
 ### Routes
@@ -63,4 +70,7 @@ php artisan module:make-migration <migration_name> --module=<module_name> --tabl
 ### Views
 > Calling View: view('<module_name>::view_file_name')
 
-## You need to add module service provider to the list of providers in the config/app.php file
+## You need to add module service provider to the list of providers in the config/app.php file and run
+```
+composer dump-autoload 
+```

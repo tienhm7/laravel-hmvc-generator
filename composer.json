@@ -21,7 +21,12 @@
         "role": "Developer"
       }
     ],
-    "require": {},
+    "require": {
+      "php": ">=7.4"
+    },
+    "conflict": {
+      "laravel/laravel": "<8.0"
+    },
     "autoload": {
       "files": [
         "src/Helpers/functions.php"

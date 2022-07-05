@@ -3,6 +3,7 @@
 namespace tienhm7\HMVCGenerator\Console;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 
 class MiddlewareMakeCommand extends Command
 {
@@ -38,18 +39,41 @@ class MiddlewareMakeCommand extends Command
     public function handle()
     {
         $name = $this->argument('name');
+        
         $moduleName = $this->option('module') ?? $this->ask("Module Name ?");
-        $modulePath =  app_path(DIRECTORY_SEPARATOR . 'Modules' . DIRECTORY_SEPARATOR . $moduleName) . DIRECTORY_SEPARATOR;
+        $moduleName = ucfirst(Str::camel($moduleName));
+
+        $modulePath = app_path('Modules/' . $moduleName.'/');
         if (!file_exists($modulePath)) {
             $this->error(sprintf('%s module is not exists', $moduleName));
             return;
         }
-        $middleware_path = $modulePath . 'Http' . DIRECTORY_SEPARATOR . 'Middleware';
-        if (!file_exists($middleware_path)) {
-            mkdir($middleware_path, 0777, true);
+        
+        $middlewarePath = $modulePath . 'Http' . DIRECTORY_SEPARATOR . 'Middleware';
+        if (
+            !file_exists($middlewarePath) &&
+            !mkdir($middlewarePath, 0777, true) &&
+            !is_dir($middlewarePath)
+        ) {
+            throw new \RuntimeException(sprintf('Directory "%s" was not created', $middlewarePath));
         }
-        $middleware_template = str_replace(['{{module_name}}', '{{module_name_small}}', '{{middleware_name}}'], [$moduleName, strtolower($moduleName), $name], get_stub('Middleware'));
-        file_put_contents($middleware_path . DIRECTORY_SEPARATOR . $name.'.php', $middleware_template);
+
+        $middlewareTemplate = str_replace(
+            [
+                '{{module_name}}',
+                '{{module_name_small}}',
+                '{{middleware_name}}'
+            ],
+            [
+                $moduleName,
+                strtolower($moduleName),
+                $name
+            ],
+            get_stub('Middleware')
+        );
+
+        file_put_contents($middlewarePath . DIRECTORY_SEPARATOR . $name.'.php', $middlewareTemplate);
+
         $this->info('Done !');
     }
 }

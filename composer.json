@@ -1,0 +1,40 @@
+{
+    "type": "library",
+    "name": "tienhm7/laravel-hmvc-generator",
+    "description": "this package which created to manage your large by modules using HMVC architectural pattern",
+    "keywords": [
+      "HMVC",
+      "modules",
+      "library",
+      "laravel",
+      "laravel HMVC",
+      "laravel modules"
+    ],
+    "homepage": "https://github.com/tienhm7/laravel-hmvc-generator",
+    "license": "MIT",
+    "minimum-stability": "stable",
+    "authors": [
+      {
+        "name": "Hoang Manh Tien",
+        "email": "tiencntt2@gmail.com",
+        "homepage": "https://github.com/tienhm7",
+        "role": "Developer"
+      }
+    ],
+    "require": {},
+    "autoload": {
+      "files": [
+        "src/Helpers/functions.php"
+      ],
+      "psr-4": {
+        "tienhm7\\HMVCGenerator\\": "src/"
+      }
+    },
+    "extra": {
+      "laravel": {
+        "providers": [
+          "tienhm7\\HMVCGenerator\\HMVCGeneratorServiceProvider"
+        ]
+      }
+    }
+}
